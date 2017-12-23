@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -10,14 +11,25 @@ type errorResp struct {
 	Error string `json:"error"`
 }
 
-func reportError(w http.ResponseWriter, err string) {
-	msg := errorResp{err}
-	buf, _ := json.Marshal(msg)
+func reportError(w http.ResponseWriter, err error, module, message string) {
+	if err != nil {
+		log.Printf("[%s] %s\n", module, err.Error())
+	} else {
+		log.Printf("[%s] %s\n", module, message)
+	}
+	msg := errorResp{message}
+	buf, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", "Apache/2.2.34'<!--")
+	w.Header().Set("X-AspNet-Version", "2.0.50727'<!--")
+	w.Header().Set("X-Powered-By", "PHP/5.5.38'<!--")
 	w.WriteHeader(503)
 	w.Write(buf)
 }
 
-func reportInvalidArgument(w http.ResponseWriter, arg string) {
-	reportError(w, fmt.Sprintf("Invalid argument: %q", arg))
+func reportInvalidArgument(w http.ResponseWriter, module, arg string) {
+	reportError(w, nil, module, fmt.Sprintf("Invalid argument: %q", arg))
 }

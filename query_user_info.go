@@ -1,20 +1,51 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"net/http"
 )
 
-type queryUserInfoResp struct {
-	Error         *string `json:"error"`
-	ID            uint64  `json:"id"`
-	Username      string  `json:"username"`
-	Alias         string  `json:"alias"`
-	ResellerAlias string  `json:"reseller_alias"`
-	AuthMax       string  `json:"auth_max"`
-	AuthLeft      string  `json:"auth_left"`
-	DeauthLeft    string  `json:"deauth_left"`
-	Reseller      uint64  `json:"reseller"`
+type queryUserInfoReq struct {
 }
 
-func queryUserInfoHandler(w http.ResponseWriter, req *http.Request) {
+type queryUserInfoResp struct {
+	Error    *string  `json:"error"`
+	UserInfo userInfo `json:"user_info"`
+}
+
+func queryUserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	userID, err := getUserID(r)
+	if err != nil {
+		reportError(w, nil, "query_user_info", "failed to retrieve log in state")
+		return
+	}
+	if userID == nil {
+		reportError(w, nil, "query_user_info", "unauthorized operation")
+		return
+	}
+	tx, err := db.BeginTx(context.TODO(), &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		reportError(w, err, "query_user_info", "database error")
+		return
+	}
+	defer tx.Commit()
+	row := tx.QueryRow(
+		"SELECT * FROM userInfo WHERE ID = ?;",
+		userID,
+	)
+	resp := queryUserInfoResp{}
+	var rec userInfo
+	var password, salt *string
+	err = row.Scan(&rec.ID, &rec.Username, &password, &salt, &rec.Alias, &rec.ResellerAlias, &rec.AuthMax, &rec.AuthLeft, &rec.DeauthLeft, &rec.Reseller)
+	if err != nil {
+		reportError(w, err, "query_user_info", "database error")
+		return
+	}
+	resp.UserInfo = rec
+	err = encodeResponse(w, resp)
+	if err != nil {
+		reportError(w, nil, "query_user_info", "failed to generate response")
+		return
+	}
 }
