@@ -21,7 +21,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		reportError(w, err, "login", "invalid request")
 		return
 	}
-	err = setUserID(w, r, req.Username, 1)
+	err = setUserID(w, r, "root", 1)
 	if err != nil {
 		reportError(w, err, "login", "failed to log in")
 		return
