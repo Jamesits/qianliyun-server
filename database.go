@@ -52,7 +52,7 @@ func initDatabase() {
 			"Host TEXT, " +
 			"Comment TEXT, " +
 			"Begin REAL, " +
-			"End REAL" +
+			"End REAL, " +
 			"Tags TEXT" +
 			");",
 	)
