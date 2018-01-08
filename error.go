@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime/debug"
 )
 
 type errorResp struct {
@@ -12,6 +13,7 @@ type errorResp struct {
 }
 
 func reportError(w http.ResponseWriter, err error, module, message string) {
+	debug.PrintStack()
 	if err != nil {
 		log.Printf("[%s] %s\n", module, err.Error())
 	} else {

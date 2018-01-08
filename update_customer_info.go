@@ -95,7 +95,7 @@ func updateCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if req.LiveID != nil {
 		var liveViewerRecordCount int
 		err = tx.QueryRow(
-			"SELECT COUNT(*) FROM liveViewer WHILE "+
+			"SELECT COUNT(*) FROM liveViewer WHERE "+
 				"UserID = ? AND "+
 				"LiveID = ? AND "+
 				"CustomerID = ?;",

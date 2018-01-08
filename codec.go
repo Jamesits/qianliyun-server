@@ -73,21 +73,10 @@ func getUserID(r *http.Request) (*int64, error) {
 }
 
 func setUserID(w http.ResponseWriter, r *http.Request, username string, userID int64) error {
-	session, err := store.Get(r, "JSESSIONID")
-	if err != nil {
-		cookie, err := r.Cookie("JSESSIONID")
-		if err != nil {
-			return err
-		}
-		cookie.Value = ""
-		session, err = store.Get(r, "JSESSIONID")
-		if err != nil {
-			return err
-		}
-	}
+	session, _ := store.New(r, "JSESSIONID")
 	session.Values["username"] = username
 	session.Values["userid"] = userID
-	err = session.Save(r, w)
+	err := session.Save(r, w)
 	if err != nil {
 		return err
 	}
