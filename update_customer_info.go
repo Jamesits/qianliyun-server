@@ -92,7 +92,6 @@ func updateCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		reportError(w, err, "update_customer_info", "no record affected")
 		return
 	}
-	resp.ID = *req.ID
 	if req.LiveID != nil {
 		var liveViewerRecordCount int
 		err = tx.QueryRow(

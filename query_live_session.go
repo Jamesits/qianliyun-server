@@ -54,6 +54,7 @@ func queryLiveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	resp := queryLiveSessionResp{}
+	resp.LiveSession = []liveSession{}
 	for rows.Next() {
 		var rec liveSession
 		var tags *string

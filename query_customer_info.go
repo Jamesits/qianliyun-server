@@ -53,6 +53,7 @@ func queryCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	resp := queryCustomerInfoResp{}
+	resp.CustomerInfo = []customerInfo{}
 	for rows.Next() {
 		var rec customerInfo
 		var tags *string

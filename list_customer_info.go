@@ -49,6 +49,7 @@ func listCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	resp := listCustomerInfoResp{}
+	resp.CustomerID = []int64{}
 	for rows.Next() {
 		var rec int64
 		err = rows.Scan(&rec)
