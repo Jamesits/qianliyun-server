@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 )
 
@@ -38,57 +39,80 @@ func updateCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var resp updateCustomerInfoResp
 	if req.ID != nil {
-		res, err := tx.Exec(
-			"UPDATE customerInfo SET "+
-				"CustomerName = IFNULL(?, CustomerName), "+
-				"Mobile = IFNULL(?, Mobile), "+
-				"Status = IFNULL(?, Status), "+
-				"Tags = IFNULL(?, Tags) "+
-				"WHERE ID = ? AND UserID = ?;",
-			req.CustomerName, req.Mobile, req.Status, encodeList(req.Tags), req.ID, userID,
-		)
-		if err != nil {
-			reportError(w, err, "update_customer_info", "database error")
-			return
-		}
-		rowsAffected, err := res.RowsAffected()
-		if err != nil {
-			reportError(w, err, "update_customer_info", "database error")
-			return
-		}
-		if rowsAffected == 0 {
-			reportError(w, nil, "update_customer_info", "no record found")
-			return
-		}
 		resp.ID = *req.ID
-		if req.LiveID != nil {
-			_, _ = tx.Exec(
-				"UPDATE liveViewer SET LiveID = ? WHERE UserID = ? AND CustomerID = ?;",
-				req.LiveID, userID, resp.ID,
-			)
-		}
+	} else if req.CustomerName == nil {
+		reportError(w, nil, "update_customer_info", "empty query criteria")
+		return
 	} else {
-		res, err := tx.Exec(
-			"INSERT INTO customerInfo "+
-				"(UserID, CustomerName, Mobile, Status, Tags)"+
-				"VALUES (?, ?, ?, ?, ?);",
-			userID, req.CustomerName, req.Mobile, req.Status, encodeList(req.Tags),
+		err = tx.QueryRow(
+			"SELECT ID FROM customerInfo WHERE "+
+				"UserID = ? AND "+
+				"CustomerName = ? "+
+				"LIMIT 1;",
+			userID, req.CustomerName,
+		).Scan(&resp.ID)
+		if err == sql.ErrNoRows {
+			res, err := tx.Exec(
+				"INSERT INTO customerInfo "+
+					"(UserID, CustomerName)"+
+					"VALUES (?, ?);",
+				userID, req.CustomerName,
+			)
+			if err != nil {
+				reportError(w, err, "update_customer_info", "database error")
+				return
+			}
+			lastInsertID, err := res.LastInsertId()
+			if err != nil {
+				reportError(w, err, "update_customer_info", "database error")
+				return
+			}
+			resp.ID = lastInsertID
+		}
+	}
+	res, err := tx.Exec(
+		"UPDATE customerInfo SET "+
+			"CustomerName = IFNULL(?, CustomerName), "+
+			"Mobile = IFNULL(?, Mobile), "+
+			"Status = IFNULL(?, Status), "+
+			"Tags = IFNULL(?, Tags) "+
+			"WHERE ID = ? AND UserID = ?;",
+		req.CustomerName, req.Mobile, req.Status, encodeList(req.Tags), resp.ID, userID,
+	)
+	if err != nil {
+		reportError(w, err, "update_customer_info", "database error")
+		return
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		reportError(w, err, "update_customer_info", "database error")
+		return
+	}
+	if rowsAffected == 0 {
+		reportError(w, err, "update_customer_info", "no record affected")
+		return
+	}
+	resp.ID = *req.ID
+	if req.LiveID != nil {
+		var liveViewerRecordCount int
+		err = tx.QueryRow(
+			"SELECT COUNT(*) FROM liveViewer WHILE "+
+				"UserID = ? AND "+
+				"LiveID = ? AND "+
+				"CustomerID = ?;",
+			userID, req.LiveID, resp.ID,
+		).Scan(&liveViewerRecordCount)
+		if err != nil {
+			reportError(w, err, "update_customer_info", "database error")
+			return
+		}
+		_, err = tx.Exec(
+			"INSERT INTO liveViewer (UserID, LiveID, CustomerID) VALUES (?, ?, ?);",
+			userID, req.LiveID, resp.ID,
 		)
 		if err != nil {
 			reportError(w, err, "update_customer_info", "database error")
 			return
-		}
-		lastInsertID, err := res.LastInsertId()
-		if err != nil {
-			reportError(w, err, "update_customer_info", "database error")
-			return
-		}
-		resp.ID = lastInsertID
-		if req.LiveID != nil {
-			_, _ = tx.Exec(
-				"INSERT INTO liveViewer (UserID, LiveID, CustomerID) VALUES (?, ?, ?)",
-				userID, req.LiveID, resp.ID,
-			)
 		}
 	}
 	tx.Commit()

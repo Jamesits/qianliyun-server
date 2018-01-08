@@ -30,14 +30,13 @@ func queryUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Commit()
-	row := tx.QueryRow(
-		"SELECT * FROM userInfo WHERE ID = ?;",
-		userID,
-	)
 	resp := queryUserInfoResp{}
 	var rec userInfo
 	var password, salt *string
-	err = row.Scan(&rec.ID, &rec.Username, &password, &salt, &rec.Alias, &rec.ResellerAlias, &rec.AuthMax, &rec.AuthLeft, &rec.DeauthLeft, &rec.Reseller)
+	err = tx.QueryRow(
+		"SELECT * FROM userInfo WHERE ID = ?;",
+		userID,
+	).Scan(&rec.ID, &rec.Username, &password, &salt, &rec.Alias, &rec.ResellerAlias, &rec.AuthMax, &rec.AuthLeft, &rec.DeauthLeft, &rec.Reseller)
 	if err != nil {
 		reportError(w, err, "query_user_info", "database error")
 		return

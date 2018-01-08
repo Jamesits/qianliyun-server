@@ -39,13 +39,13 @@ func queryLiveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	defer tx.Commit()
 	rows, err := tx.Query(
 		"SELECT * FROM liveSession WHERE "+
-			"ID = IFNULL(?, 1) AND "+
+			"IFNULL(ID = ?, 1) AND "+
 			"UserID = ? AND "+
-			"URL = IFNULL(?, 1) AND "+
-			"Title = IFNULL(?, 1) AND "+
-			"Host = IFNULL(?, 1) AND "+
-			"Comment = IFNULL(?, 1) AND "+
-			"Tags = IFNULL(?, 1);",
+			"IFNULL(URL = ?, 1) AND "+
+			"IFNULL(Title = ?, 1) AND "+
+			"IFNULL(Host = ?, 1) AND "+
+			"IFNULL(Comment = ?, 1) AND "+
+			"IFNULL(Tags = ?, 1);",
 		req.ID, userID, req.URL, req.Title, req.Host, req.Comment, encodeList(req.Tags),
 	)
 	if err != nil {

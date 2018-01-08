@@ -26,6 +26,7 @@ func main() {
 	initDatabase()
 	servemux := mux.NewRouter()
 	servemux.HandleFunc("/api/login.php", loginHandler)
+	servemux.HandleFunc("/api/check_update.php", checkUpdateHandler)
 	servemux.HandleFunc("/api/query_user_info.php", queryUserInfoHandler)
 	servemux.HandleFunc("/api/update_live_session.php", updateLiveSessionHandler)
 	servemux.HandleFunc("/api/query_live_session.php", queryLiveSessionHandler)

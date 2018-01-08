@@ -7,7 +7,6 @@ import (
 )
 
 type queryCustomerInfoReq struct {
-	ID int64 `json:"id"`
 	customerInfo
 }
 
@@ -40,12 +39,12 @@ func queryCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	defer tx.Commit()
 	rows, err := tx.Query(
 		"SELECT * FROM customerInfo WHERE "+
-			"ID = IFNULL(?, 1) AND "+
+			"IFNULL(ID = ?, 1) AND "+
 			"UserID = ? AND "+
-			"CustomerName = IFNULL(?, 1) AND "+
-			"Mobile = IFNULL(?, 1) AND "+
-			"Status = IFNULL(?, 1) AND "+
-			"Tags = IFNULL(?, 1);",
+			"IFNULL(CustomerName = ?, 1) AND "+
+			"IFNULL(Mobile = ?, 1) AND "+
+			"IFNULL(Status = ?, 1) AND "+
+			"IFNULL(Tags = ?, 1);",
 		req.ID, userID, req.CustomerName, req.Mobile, req.Status, encodeList(req.Tags),
 	)
 	if err != nil {
