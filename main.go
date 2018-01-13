@@ -50,6 +50,9 @@ func main() {
 	servemux.HandleFunc("/api/update_customer_info.php", updateCustomerInfoHandler)
 	servemux.HandleFunc("/api/update_live_activity.php", updateLiveActivityHandler)
 	servemux.HandleFunc("/api/update_live_session.php", updateLiveSessionHandler)
+	servemux.HandleFunc("/cgi-bin/luci", luciHandler)
+	servemux.PathPrefix("/cgi-bin/luci/").HandlerFunc(luciHandler)
+	servemux.PathPrefix("/luci-static/").Handler(http.FileServer(http.Dir("./static")))
 	log.Fatalln(http.ListenAndServe("[::1]:6452", handlers.CombinedLoggingHandler(io.MultiWriter(os.Stderr, &lumberjack.Logger{
 		Filename:   "./logs/access.log",
 		MaxSize:    64,
