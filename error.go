@@ -6,18 +6,34 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 type errorResp struct {
 	Error string `json:"error"`
 }
 
+var errorLogger *log.Logger
+
+func init() {
+	errorLogger = log.New(&lumberjack.Logger{
+		Filename:   "./logs/error.log",
+		MaxSize:    64,
+		MaxBackups: 52,
+		MaxAge:     7,
+		Compress:   true,
+	}, "", log.LstdFlags)
+}
+
 func reportError(w http.ResponseWriter, err error, module, message string) {
-	debug.PrintStack()
+	errorLogger.Println(string(debug.Stack()))
 	if err != nil {
+		errorLogger.Printf("[%s] %s\n", module, err.Error())
 		log.Printf("[%s] %s\n", module, err.Error())
 	} else {
-		log.Printf("[%s] %s\n", module, message)
+		errorLogger.Printf("[%s] %s\n", module, message)
+		log.Printf("[%s] %s\n", module, err.Error())
 	}
 	msg := errorResp{message}
 	buf, err := json.Marshal(msg)

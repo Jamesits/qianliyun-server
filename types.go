@@ -32,9 +32,11 @@ type customerInfo struct {
 	Tags         *[]string `json:"tags"`
 }
 
-type liveViewer struct {
-	ID         *int64 `json:"id"`
-	UserID     int64  `json:"user_id"`
-	LiveID     *int64 `json:"live_id"`
-	CustomerID *int64 `json:"customer_id"`
+type liveActivity struct {
+	ID         *int64   `json:"id"`
+	UserID     int64    `json:"user_id"`
+	LiveID     *int64   `json:"live_id"`
+	Time       *float64 `json:"time"`
+	CustomerID *int64   `json:"customer_id"`
+	Activity   *string  `json:"activity"`
 }

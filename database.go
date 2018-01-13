@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,8 +12,12 @@ import (
 var db *sql.DB
 
 func initDatabase() {
-	var err error
-	db, err = sql.Open("sqlite3", "./qianliyun.db")
+	err := os.MkdirAll("./db", 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	db, err = sql.Open("sqlite3", "./db/qianliyun.db")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -73,11 +78,13 @@ func initDatabase() {
 		log.Fatalln(err)
 	}
 	_, err = tx.Exec(
-		"CREATE TABLE IF NOT EXISTS liveViewer (" +
+		"CREATE TABLE IF NOT EXISTS liveActivity (" +
 			"ID INTEGER PRIMARY KEY, " +
 			"UserID INTEGER NOT NULL, " +
-			"LiveID INTEGER NOT NULL, " +
-			"CustomerID INTEGER NOT NULL" +
+			"LiveID INTEGER, " +
+			"Time REAL, " +
+			"CustomerID INTEGER, " +
+			"Activity TEXT" +
 			");",
 	)
 	if err != nil {

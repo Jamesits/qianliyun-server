@@ -8,7 +8,6 @@ import (
 
 type updateCustomerInfoReq struct {
 	customerInfo
-	LiveID *int64 `json:"live_id"`
 }
 
 type updateCustomerInfoResp struct {
@@ -91,28 +90,6 @@ func updateCustomerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if rowsAffected == 0 {
 		reportError(w, err, "update_customer_info", "no record affected")
 		return
-	}
-	if req.LiveID != nil {
-		var liveViewerRecordCount int
-		err = tx.QueryRow(
-			"SELECT COUNT(*) FROM liveViewer WHERE "+
-				"UserID = ? AND "+
-				"LiveID = ? AND "+
-				"CustomerID = ?;",
-			userID, req.LiveID, resp.ID,
-		).Scan(&liveViewerRecordCount)
-		if err != nil {
-			reportError(w, err, "update_customer_info", "database error")
-			return
-		}
-		_, err = tx.Exec(
-			"INSERT INTO liveViewer (UserID, LiveID, CustomerID) VALUES (?, ?, ?);",
-			userID, req.LiveID, resp.ID,
-		)
-		if err != nil {
-			reportError(w, err, "update_customer_info", "database error")
-			return
-		}
 	}
 	tx.Commit()
 	err = encodeResponse(w, resp)
