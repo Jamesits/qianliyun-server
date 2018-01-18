@@ -38,13 +38,15 @@ func queryLiveActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Commit()
 	rows, err := tx.Query(
-		"SELECT * FROM liveActivity WHERE "+
-			"IFNULL(ID = ?, 1) AND "+
-			"UserID = ? AND "+
-			"IFNULL(LiveID = ?, 1) AND "+
-			"IFNULL(Time = ?, 1) AND "+
-			"IFNULL(CustomerID = ?, 1) AND "+
-			"IFNULL(Activity = ?, 1);",
+		"SELECT * FROM liveActivity INNER JOIN customerInfo ON "+
+			"customerInfo.ID = liveActivity.CustomerID AND "+
+			"customerInfo.UserID = liveActivity.UserID WHERE "+
+			"IFNULL(liveActivity.ID = ?, 1) AND "+
+			"liveActivity.UserID = ? AND "+
+			"IFNULL(liveActivity.LiveID = ?, 1) AND "+
+			"IFNULL(liveActivity.Time = ?, 1) AND "+
+			"IFNULL(liveActivity.CustomerID = ?, 1) AND "+
+			"IFNULL(liveActivity.Activity = ?, 1);",
 		req.ID, userID, req.LiveID, req.Time, req.CustomerID, req.Activity,
 	)
 	if err != nil {
@@ -55,11 +57,15 @@ func queryLiveActivityHandler(w http.ResponseWriter, r *http.Request) {
 	resp := queryLiveActivityResp{}
 	for rows.Next() {
 		var rec liveActivity
-		err = rows.Scan(&rec.ID, &rec.UserID, &rec.LiveID, &rec.Time, &rec.CustomerID, &rec.Activity)
+		var tags *string
+		rec.CustomerInfo = new(customerInfo)
+		err = rows.Scan(&rec.ID, &rec.UserID, &rec.LiveID, &rec.Time, &rec.CustomerID, &rec.Activity,
+			&rec.CustomerInfo.ID, &rec.CustomerInfo.UserID, &rec.CustomerInfo.CustomerName, &rec.CustomerInfo.Mobile, &rec.CustomerInfo.Status, &tags)
 		if err != nil {
 			reportError(w, err, "query_live_activity", "database error")
 			return
 		}
+		rec.CustomerInfo.Tags = decodeList(tags)
 		resp.LiveActivity = append(resp.LiveActivity, rec)
 	}
 	err = encodeResponse(w, resp)
