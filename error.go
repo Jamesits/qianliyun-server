@@ -33,7 +33,7 @@ func reportError(w http.ResponseWriter, err error, module, message string) {
 		log.Printf("[%s] %s\n", module, err.Error())
 	} else {
 		errorLogger.Printf("[%s] %s\n", module, message)
-		log.Printf("[%s] %s\n", module, err.Error())
+		log.Printf("[%s] %s\n", module, message)
 	}
 	msg := errorResp{message}
 	buf, err := json.Marshal(msg)

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const bypassAuth = true
+const bypassAuth = false
 
 func decodeRequest(r *http.Request, v interface{}) error {
 	req, err := ioutil.ReadAll(r.Body)
