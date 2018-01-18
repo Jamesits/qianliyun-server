@@ -1,5 +1,11 @@
 package main
 
+type updateInfo struct {
+	LatestVersion [4]uint `json:"latest_version"`
+	UpdateURL     string  `json:"update_url"`
+	Changelog     string  `json:"changelog"`
+}
+
 type userInfo struct {
 	ID            int64         `json:"id"`
 	Username      *string       `json:"username"`
