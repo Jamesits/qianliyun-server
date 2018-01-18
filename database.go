@@ -21,7 +21,7 @@ func initDatabase() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	tx, err := db.BeginTx(context.TODO(), &sql.TxOptions{ReadOnly: true})
+	tx, err := db.BeginTx(context.TODO(), &sql.TxOptions{})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -36,14 +36,32 @@ func initDatabase() {
 			"AuthMax INTEGER, " +
 			"AuthLeft INTEGER, " +
 			"DeauthLeft INTEGER, " +
-			"Reseller INTEGER" +
+			"ResellerID INTEGER" +
 			");",
 	)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	_, err = tx.Exec(
-		"REPLACE INTO userInfo (ID, Username, AuthMax, AuthLeft, DeauthLeft) VALUES (1, 'root', 2147483647, 2147483647, 2147483647);",
+		"REPLACE INTO userInfo (ID, Username, AuthMax, AuthLeft, DeauthLeft, ResellerID) VALUES (1, 'root', 2147483647, 2147483647, 2147483647, 1);",
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_, err = tx.Exec(
+		"CREATE TABLE IF NOT EXISTS resellerInfo (" +
+			"ID INTEGER PRIMARY KEY, " +
+			"Alias TEXT, " +
+			"AppTitle TEXT, " +
+			"AppStatus TEXT, " +
+			"AppCopyright TEXT" +
+			");",
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_, err = tx.Exec(
+		"REPLACE INTO resellerInfo (ID, Alias, AppTitle) VALUES (1, 'root', '千里云打标系统');",
 	)
 	if err != nil {
 		log.Fatalln(err)

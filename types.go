@@ -1,14 +1,23 @@
 package main
 
 type userInfo struct {
-	ID            int64   `json:"id"`
-	Username      *string `json:"username"`
-	Alias         *string `json:"alias"`
-	ResellerAlias *string `json:"reseller_alias"`
-	AuthMax       *int    `json:"auth_max"`
-	AuthLeft      *int    `json:"auth_left"`
-	DeauthLeft    *int    `json:"deauth_left"`
-	Reseller      *int64  `json:"reseller"`
+	ID            int64         `json:"id"`
+	Username      *string       `json:"username"`
+	Alias         *string       `json:"alias"`
+	ResellerAlias *string       `json:"reseller_alias"`
+	AuthMax       *int          `json:"auth_max"`
+	AuthLeft      *int          `json:"auth_left"`
+	DeauthLeft    *int          `json:"deauth_left"`
+	ResellerID    *int64        `json:"reseller_id"`
+	ResellerInfo  *resellerInfo `json:"reseller_info"`
+}
+
+type resellerInfo struct {
+	ID           int64   `json:"id"`
+	Alias        *string `json:"alias"`
+	AppTitle     *string `json:"app_title"`
+	AppStatus    *string `json:"app_status"`
+	AppCopyright *string `json:"app_copyright"`
 }
 
 type liveSession struct {
